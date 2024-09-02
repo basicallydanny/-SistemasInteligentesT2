@@ -110,10 +110,35 @@ def depthFirstSearch(problem: SearchProblem):
     return final
     ### util.raiseNotDefined()
 
+#JOAN
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    Cola = Queue()   
+    pathToCurrent=Queue()                       
+    
+    visitados = []                            
+    tempPath=[]                            
+    path=[]                                 
+    
+    Cola.push(problem.getStartState())
+    currState = Cola.pop()
+    
+    while not problem.isGoalState(currState):
+        if currState not in visitados:
+            visitados.append(currState)    
+            successors = problem.getSuccessors(currState)
+            for child,direction,cost in successors:
+                Cola.push(child)
+                tempPath = path + [direction]
+                pathToCurrent.push(tempPath)
+        currState = Cola.pop()
+        path = pathToCurrent.pop()
+        
+    return path
+    #util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
