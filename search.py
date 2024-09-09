@@ -110,15 +110,56 @@ def depthFirstSearch(problem: SearchProblem):
     return final
     ### util.raiseNotDefined()
 
+#JOAN
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    Cola = Queue()   
+    pathToCurrent=Queue()                       
+    
+    visitados = []                            
+    tempPath=[]                            
+    path=[]                                 
+    
+    Cola.push(problem.getStartState())
+    currState = Cola.pop()
+    
+    while not problem.isGoalState(currState):
+        if currState not in visitados:
+            visitados.append(currState)    
+            successors = problem.getSuccessors(currState)
+            for child,direction,cost in successors:
+                Cola.push(child)
+                tempPath = path + [direction]
+                pathToCurrent.push(tempPath)
+        currState = Cola.pop()
+        path = pathToCurrent.pop()
+        
+    return path
+    #util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    start_state = problem.getStartState()
+    frontier.push(([], 0, start_state), 0)
+    visited = set()
+    while not frontier.isEmpty():
+        path, current_cost, current_state = frontier.pop()
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+        if problem.isGoalState(current_state):
+            return path
+        for successor, action, step_cost in problem.getSuccessors(current_state):
+            if successor not in visited:
+                new_cost = current_cost + step_cost
+                new_path = path + [action]
+                frontier.push((new_path, new_cost, successor), new_cost)
+    return []
+    #util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
