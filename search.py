@@ -16,7 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
-
+import random
 import util
 from util import Stack
 from util import Queue
@@ -192,8 +192,95 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     return []
     ## util.raiseNotDefined()
 
+
+#GPT ASSITST PROMPT: I have the following class that i use to solve paths in a pacman game. 
+# [shows the code above] I want to include a Genetic Search Path, could you implement it? 
+def geneticSearch(problem: SearchProblem, population_size=100, generations=1000, mutation_rate=0.1):
+    """
+    Genetic algorithm to find a path in the search problem.
+    
+    Args:
+        problem (SearchProblem): The problem to solve.
+        population_size (int): Number of individuals in the population.
+        generations (int): Number of generations to run.
+        mutation_rate (float): Probability of mutation.
+
+    Returns:
+        List of actions representing the path from start to goal.
+    """
+    def generate_individual():
+        """Generate a random individual (sequence of actions)."""
+        actions = []
+        current_state = problem.getStartState()
+        for _ in range(20):  # Limiting to a max to prevent infinite loops
+            if problem.isGoalState(current_state):
+                break
+            successors = problem.getSuccessors(current_state)
+            if not successors:
+                break
+            action = random.choice(successors)[1]
+            actions.append(action)
+            current_state = successors[0][0]
+        return actions
+
+    def fitness(individual):
+        """Calculate the fitness of an individual."""
+        current_state = problem.getStartState()
+        cost = 0
+        for action in individual:
+            successors = problem.getSuccessors(current_state)
+            for successor, succ_action, step_cost in successors:
+                if succ_action == action:
+                    current_state = successor
+                    cost += step_cost
+                    break
+        if problem.isGoalState(current_state):
+            return 1 / (1 + cost)  # Higher fitness for shorter paths
+        return 1 / (1 + cost + 1000)  # Penalize paths that don't reach the goal
+
+    def crossover(parent1, parent2):
+        """Crossover between two parents."""
+        crossover_point = random.randint(0, min(len(parent1), len(parent2)) - 1)
+        child1 = parent1[:crossover_point] + parent2[crossover_point:]
+        child2 = parent2[:crossover_point] + parent1[crossover_point:]
+        return child1, child2
+
+    def mutate(individual):
+        """Mutate an individual."""
+        if random.random() < mutation_rate:
+            mutation_point = random.randint(0, len(individual) - 1)
+            individual[mutation_point] = random.choice(
+                [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST])
+        return individual
+
+    # Initialize population
+    population = [generate_individual() for _ in range(population_size)]
+
+    for generation in range(generations):
+        # Evaluate fitness
+        population = sorted(population, key=lambda ind: -fitness(ind))
+        if fitness(population[0]) == 1:
+            break  # Found an optimal solution
+
+        # Selection: Select the top individuals to breed
+        breeding_pool = population[:population_size // 2]
+        # Crossover and Mutation
+        new_population = []
+        while len(new_population) < population_size:
+            parent1, parent2 = random.sample(breeding_pool, 2)
+            child1, child2 = crossover(parent1, parent2)
+            new_population.append(mutate(child1))
+            new_population.append(mutate(child2))
+
+        population = new_population
+
+    # Return the best individual
+    best_individual = max(population, key=lambda ind: fitness(ind))
+    return best_individual
+
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+gen = geneticSearch
