@@ -277,14 +277,13 @@ class CornersProblem(search.SearchProblem):
 
     You must select a suitable state space and successor function
     """
-
     def __init__(self, startingGameState: pacman.GameState):
         """
         Stores the walls, pacman's starting position and corners.
         """
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
-        self.startState = (self.startingPosition,0,0,0,0)
+        self.startState = (self.startingPosition,0,0,0,0) #Pos inicial y si las esquinas fueron visitadas
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
@@ -293,12 +292,11 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
 
     def getStartState(self):
-        return self.startState
+        return self.startState #IMPLEMENTADO ARRIBA
 
     def isGoalState(self, state: Any):
-        return state[1] and state[2] and state[3] and state[4]
+        return state[1] and state[2] and state[3] and state[4] #nuestro objetivo es todas las esquinas
 
-    # HABLAR DE ESTO EN VIDEO !!!!
     def getSuccessors(self, state: Any):
         """
         Returns successor states, the actions they require, and a cost of 1.
@@ -317,16 +315,16 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-            x,y = state[0]
-            dx, dy = Actions.directionToVector(action)
+            x,y = state[0] #pos actual de pacman
+            dx, dy = Actions.directionToVector(action) #vector que indica cómo cambian las coordenadas
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                if (nextx, nexty) == self.corners[0]: nextState = ((nextx, nexty),1,state[2],state[3],state[4])
+            if not self.walls[nextx][nexty]: #choca con una pared?
+                if (nextx, nexty) == self.corners[0]: nextState = ((nextx, nexty),1,state[2],state[3],state[4]) #llega a una esquina
                 elif (nextx, nexty) == self.corners[1]: nextState = ((nextx, nexty),state[1],1,state[3],state[4])
                 elif (nextx, nexty) == self.corners[2]: nextState = ((nextx, nexty),state[1],state[2],1,state[4])
                 elif (nextx, nexty) == self.corners[3]: nextState = ((nextx, nexty),state[1],state[2],state[3],1)
-                else: nextState = ((nextx, nexty),state[1],state[2],state[3],state[4])
-                successors.append( ( nextState, action, 1) )
+                else: nextState = ((nextx, nexty),state[1],state[2],state[3],state[4]) #si no, tiene nueva pos pero no cambia estados
+                successors.append( ( nextState, action, 1) ) #nuevo sucesor
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -343,7 +341,6 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
-# HABLAR DE ESTO EN VIDEO !!!! 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
     A heuristic for the CornersProblem that you defined.
